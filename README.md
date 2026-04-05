@@ -4,22 +4,30 @@ A production-quality REST API backend for a Finance Dashboard application. Built
 
 ---
 
+## Deployed Backend
+
+**Base URL:** `https://zorvyn-assignment-mz7e.onrender.com`
+
+For comprehensive API documentation with all routes, request/response examples, and usage details, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+
+---
+
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Runtime | Node.js |
-| Language | TypeScript (strict mode) |
-| Framework | Express.js |
-| Database | MongoDB + Mongoose ODM |
-| Validation | Zod |
-| Auth | JWT (jsonwebtoken) |
-| Password hashing | bcryptjs |
-| Environment | dotenv |
-| Security | helmet, cors |
-| Logging | morgan |
-| Error handling | express-async-errors |
-| Date utilities | dayjs |
+| Layer            | Technology               |
+| ---------------- | ------------------------ |
+| Runtime          | Node.js                  |
+| Language         | TypeScript (strict mode) |
+| Framework        | Express.js               |
+| Database         | MongoDB + Mongoose ODM   |
+| Validation       | Zod                      |
+| Auth             | JWT (jsonwebtoken)       |
+| Password hashing | bcryptjs                 |
+| Environment      | dotenv                   |
+| Security         | helmet, cors             |
+| Logging          | morgan                   |
+| Error handling   | express-async-errors     |
+| Date utilities   | dayjs                    |
 
 ---
 
@@ -123,6 +131,7 @@ Health check: `GET http://localhost:5000/health`
 ## API Reference
 
 All successful responses follow this shape:
+
 ```json
 {
   "success": true,
@@ -132,6 +141,7 @@ All successful responses follow this shape:
 ```
 
 All error responses:
+
 ```json
 {
   "success": false,
@@ -141,6 +151,7 @@ All error responses:
 ```
 
 Paginated responses include:
+
 ```json
 {
   "success": true,
@@ -155,83 +166,84 @@ Paginated responses include:
 
 ### Auth
 
-| Method | Endpoint | Auth | Role | Body | Description |
-|--------|----------|------|------|------|-------------|
-| POST | /api/auth/register | No | — | `name, email, password` | Register new user (viewer role) |
-| POST | /api/auth/login | No | — | `email, password` | Login, returns JWT token |
-| GET | /api/auth/me | Yes | All | — | Get current authenticated user |
-| PATCH | /api/auth/change-password | Yes | All | `currentPassword, newPassword` | Change own password |
+| Method | Endpoint                  | Auth | Role | Body                           | Description                     |
+| ------ | ------------------------- | ---- | ---- | ------------------------------ | ------------------------------- |
+| POST   | /api/auth/register        | No   | —    | `name, email, password`        | Register new user (viewer role) |
+| POST   | /api/auth/login           | No   | —    | `email, password`              | Login, returns JWT token        |
+| GET    | /api/auth/me              | Yes  | All  | —                              | Get current authenticated user  |
+| PATCH  | /api/auth/change-password | Yes  | All  | `currentPassword, newPassword` | Change own password             |
 
 ---
 
 ### Users
 
-| Method | Endpoint | Auth | Role | Params/Body | Description |
-|--------|----------|------|------|-------------|-------------|
-| POST | /api/users | Yes | Admin | `name, email, password, role?, status?` | Create user with any role |
-| GET | /api/users | Yes | Admin, Analyst | `page, limit, status, role, search` | List users with filters |
-| GET | /api/users/:id | Yes | Admin, Analyst | — | Get user by ID |
-| PATCH | /api/users/:id | Yes | Admin | `name?, email?, role?, status?` | Update user |
-| DELETE | /api/users/:id | Yes | Admin | — | Soft deactivate user (sets status=inactive) |
-| GET | /api/users/:id/stats | Yes | Admin, Analyst | — | Financial summary for a specific user |
+| Method | Endpoint             | Auth | Role           | Params/Body                             | Description                                 |
+| ------ | -------------------- | ---- | -------------- | --------------------------------------- | ------------------------------------------- |
+| POST   | /api/users           | Yes  | Admin          | `name, email, password, role?, status?` | Create user with any role                   |
+| GET    | /api/users           | Yes  | Admin, Analyst | `page, limit, status, role, search`     | List users with filters                     |
+| GET    | /api/users/:id       | Yes  | Admin, Analyst | —                                       | Get user by ID                              |
+| PATCH  | /api/users/:id       | Yes  | Admin          | `name?, email?, role?, status?`         | Update user                                 |
+| DELETE | /api/users/:id       | Yes  | Admin          | —                                       | Soft deactivate user (sets status=inactive) |
+| GET    | /api/users/:id/stats | Yes  | Admin, Analyst | —                                       | Financial summary for a specific user       |
 
 ---
 
 ### Records
 
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| POST | /api/records | Yes | Admin, Analyst | Create a financial record |
-| GET | /api/records | Yes | All | List records (role-scoped) |
-| GET | /api/records/:id | Yes | All | Get single record (ownership enforced for viewers) |
-| PATCH | /api/records/:id | Yes | Admin, Analyst | Update record |
-| DELETE | /api/records/:id | Yes | Admin | Soft-delete record (sets isDeleted=true) |
-| PATCH | /api/records/:id/restore | Yes | Admin | Restore a soft-deleted record |
+| Method | Endpoint                 | Auth | Role           | Description                                        |
+| ------ | ------------------------ | ---- | -------------- | -------------------------------------------------- |
+| POST   | /api/records             | Yes  | Admin, Analyst | Create a financial record                          |
+| GET    | /api/records             | Yes  | All            | List records (role-scoped)                         |
+| GET    | /api/records/:id         | Yes  | All            | Get single record (ownership enforced for viewers) |
+| PATCH  | /api/records/:id         | Yes  | Admin, Analyst | Update record                                      |
+| DELETE | /api/records/:id         | Yes  | Admin          | Soft-delete record (sets isDeleted=true)           |
+| PATCH  | /api/records/:id/restore | Yes  | Admin          | Restore a soft-deleted record                      |
 
 #### GET /api/records — Query Parameters
 
-| Param | Type | Description |
-|-------|------|-------------|
-| `page` | number | Page number (default: 1) |
-| `limit` | number | Results per page (default: 10, max: 100) |
-| `type` | `income` \| `expense` | Filter by transaction type |
-| `category` | string | Partial match on category (case-insensitive) |
-| `tags` | string | Comma-separated tag IDs: `tag1id,tag2id` |
-| `search` | string | Searches both `notes` and `category` fields |
-| `startDate` | ISO date | Inclusive start of date range |
-| `endDate` | ISO date | Inclusive end of date range |
-| `userId` | string | Admin/Analyst only — filter by specific user |
-| `sortBy` | `date` \| `amount` \| `category` | Sort field (default: `date`) |
-| `sortOrder` | `asc` \| `desc` | Sort direction (default: `desc`) |
+| Param       | Type                             | Description                                  |
+| ----------- | -------------------------------- | -------------------------------------------- |
+| `page`      | number                           | Page number (default: 1)                     |
+| `limit`     | number                           | Results per page (default: 10, max: 100)     |
+| `type`      | `income` \| `expense`            | Filter by transaction type                   |
+| `category`  | string                           | Partial match on category (case-insensitive) |
+| `tags`      | string                           | Comma-separated tag IDs: `tag1id,tag2id`     |
+| `search`    | string                           | Searches both `notes` and `category` fields  |
+| `startDate` | ISO date                         | Inclusive start of date range                |
+| `endDate`   | ISO date                         | Inclusive end of date range                  |
+| `userId`    | string                           | Admin/Analyst only — filter by specific user |
+| `sortBy`    | `date` \| `amount` \| `category` | Sort field (default: `date`)                 |
+| `sortOrder` | `asc` \| `desc`                  | Sort direction (default: `desc`)             |
 
 ---
 
 ### Tags
 
-| Method | Endpoint | Auth | Role | Body | Description |
-|--------|----------|------|------|------|-------------|
-| GET | /api/tags | Yes | All | — | List all tags (sorted by name) |
-| POST | /api/tags | Yes | Admin, Analyst | `name, color?` | Create a tag |
-| DELETE | /api/tags/:id | Yes | Admin | — | Delete tag + remove from all records |
+| Method | Endpoint      | Auth | Role           | Body           | Description                          |
+| ------ | ------------- | ---- | -------------- | -------------- | ------------------------------------ |
+| GET    | /api/tags     | Yes  | All            | —              | List all tags (sorted by name)       |
+| POST   | /api/tags     | Yes  | Admin, Analyst | `name, color?` | Create a tag                         |
+| DELETE | /api/tags/:id | Yes  | Admin          | —              | Delete tag + remove from all records |
 
 ---
 
 ### Dashboard / Analytics
 
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| GET | /api/dashboard/summary | Yes | All | Top-level summary cards |
-| GET | /api/dashboard/monthly | Yes | All | Month-by-month income/expense data |
-| GET | /api/dashboard/categories | Yes | All | Category breakdown with percentages |
-| GET | /api/dashboard/category-trends | Yes | All | Category spend per month (grouped bar chart) |
-| GET | /api/dashboard/user-stats | Yes | Admin, Analyst | Per-user income/expense totals |
-| GET | /api/dashboard/user-category/:userId | Yes | Admin, Analyst | Category breakdown for a specific user |
+| Method | Endpoint                             | Auth | Role           | Description                                  |
+| ------ | ------------------------------------ | ---- | -------------- | -------------------------------------------- |
+| GET    | /api/dashboard/summary               | Yes  | All            | Top-level summary cards                      |
+| GET    | /api/dashboard/monthly               | Yes  | All            | Month-by-month income/expense data           |
+| GET    | /api/dashboard/categories            | Yes  | All            | Category breakdown with percentages          |
+| GET    | /api/dashboard/category-trends       | Yes  | All            | Category spend per month (grouped bar chart) |
+| GET    | /api/dashboard/user-stats            | Yes  | Admin, Analyst | Per-user income/expense totals               |
+| GET    | /api/dashboard/user-category/:userId | Yes  | Admin, Analyst | Category breakdown for a specific user       |
 
 #### GET /api/dashboard/summary
 
 Query params: `userId` (admin/analyst), `startDate`, `endDate`
 
 Returns:
+
 ```json
 {
   "totalIncome": 12000,
@@ -249,8 +261,17 @@ Returns:
 Query params: `userId` (admin/analyst), `year`
 
 Returns array of:
+
 ```json
-{ "month": 1, "year": 2024, "monthLabel": "Jan", "totalIncome": 5000, "totalExpense": 3200, "netBalance": 1800, "count": 8 }
+{
+  "month": 1,
+  "year": 2024,
+  "monthLabel": "Jan",
+  "totalIncome": 5000,
+  "totalExpense": 3200,
+  "netBalance": 1800,
+  "count": 8
+}
 ```
 
 #### GET /api/dashboard/categories
@@ -258,6 +279,7 @@ Returns array of:
 Query params: `userId` (admin/analyst), `type` (income|expense), `startDate`, `endDate`
 
 Returns array of (pie chart data):
+
 ```json
 { "category": "Rent", "total": 3000, "count": 3, "percentage": 35.29 }
 ```
@@ -267,9 +289,12 @@ Returns array of (pie chart data):
 Query params: `userId` (admin/analyst), `year`
 
 Returns array of (grouped bar chart data):
+
 ```json
 {
-  "month": 3, "year": 2024, "monthLabel": "Mar",
+  "month": 3,
+  "year": 2024,
+  "monthLabel": "Mar",
   "categories": [
     { "category": "Rent", "total": 1200, "count": 1 },
     { "category": "Food", "total": 450, "count": 5 }
@@ -282,8 +307,17 @@ Returns array of (grouped bar chart data):
 Query params: `startDate`, `endDate`
 
 Returns array of:
+
 ```json
-{ "userId": "...", "userName": "Alice", "userEmail": "alice@example.com", "totalIncome": 8000, "totalExpense": 5000, "netBalance": 3000, "recordCount": 20 }
+{
+  "userId": "...",
+  "userName": "Alice",
+  "userEmail": "alice@example.com",
+  "totalIncome": 8000,
+  "totalExpense": 5000,
+  "netBalance": 3000,
+  "recordCount": 20
+}
 ```
 
 #### GET /api/dashboard/user-category/:userId (Admin/Analyst only)
@@ -291,6 +325,7 @@ Returns array of:
 Query params: `startDate`, `endDate`
 
 Returns:
+
 ```json
 {
   "income": [{ "category": "Salary", "total": 5000, "percentage": 100 }],
@@ -302,23 +337,23 @@ Returns:
 
 ## Role Permissions Matrix
 
-| Action | Viewer | Analyst | Admin |
-|--------|:------:|:-------:|:-----:|
-| View own records | ✓ | ✓ | ✓ |
-| View all records | ✗ | ✗ | ✓ |
-| View other user records | ✗ | ✓ | ✓ |
-| Create records | ✗ | ✓ | ✓ |
-| Update own records | ✗ | ✓ | ✓ |
-| Update any record | ✗ | ✗ | ✓ |
-| Delete records | ✗ | ✗ | ✓ |
-| Restore deleted records | ✗ | ✗ | ✓ |
-| Create/manage tags | ✗ | ✓ | ✓ |
-| Delete tags | ✗ | ✗ | ✓ |
-| View users | ✗ | ✓ | ✓ |
-| Create/update users | ✗ | ✗ | ✓ |
-| View own analytics | ✓ | ✓ | ✓ |
-| View other users' analytics | ✗ | ✓ | ✓ |
-| View per-user stats | ✗ | ✓ | ✓ |
+| Action                      | Viewer | Analyst | Admin |
+| --------------------------- | :----: | :-----: | :---: |
+| View own records            |   ✓    |    ✓    |   ✓   |
+| View all records            |   ✗    |    ✗    |   ✓   |
+| View other user records     |   ✗    |    ✓    |   ✓   |
+| Create records              |   ✗    |    ✓    |   ✓   |
+| Update own records          |   ✗    |    ✓    |   ✓   |
+| Update any record           |   ✗    |    ✗    |   ✓   |
+| Delete records              |   ✗    |    ✗    |   ✓   |
+| Restore deleted records     |   ✗    |    ✗    |   ✓   |
+| Create/manage tags          |   ✗    |    ✓    |   ✓   |
+| Delete tags                 |   ✗    |    ✗    |   ✓   |
+| View users                  |   ✗    |    ✓    |   ✓   |
+| Create/update users         |   ✗    |    ✗    |   ✓   |
+| View own analytics          |   ✓    |    ✓    |   ✓   |
+| View other users' analytics |   ✗    |    ✓    |   ✓   |
+| View per-user stats         |   ✗    |    ✓    |   ✓   |
 
 ---
 
