@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import swaggerUi from 'swagger-ui-express';
+import path from "path";
 import { env } from "./config/env";
 import router from "./routes/index";
 import { errorHandler } from "./middlewares/errorHandler";
@@ -13,13 +14,19 @@ let swaggerDocument: any = {};
 try {
   swaggerDocument = require('../swagger_output.json');
 } catch (err) {
-  console.log('Swagger documentation not found. Run: npm run swagger');
+  console.log('⚠️ Swagger documentation not found. Run: npm run swagger');
 }
 
 const app = express();
 
-// Security headers
-app.use(helmet());
+// Security headers — allow swagger validator
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      imgSrc: ["'self'", 'data:', 'https://validator.swagger.io'],
+    },
+  },
+}));
 
 // CORS
 app.use(cors({ origin: "*", credentials: true }));

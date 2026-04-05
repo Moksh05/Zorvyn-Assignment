@@ -4,8 +4,8 @@
   "description": "Production-quality Finance Dashboard Backend",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only server.ts",
-    "build": "tsc",
+    "dev": "npm run swagger && ts-node-dev --respawn --transpile-only server.ts",
+    "build": "npm run swagger && tsc",
     "start": "node dist/server.js",
     "seed": "ts-node src/seed.ts",
     "swagger": "ts-node swagger.ts"
