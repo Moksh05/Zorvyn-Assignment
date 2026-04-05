@@ -510,7 +510,6 @@ Common status codes:
 1. Run `npm run seed` to populate database
 2. Start server: `npm run dev`
 3. Use Postman or curl with the dummy users above
-4. Access Swagger docs at `http://localhost:5000/api-docs`
 
 ## Notes
 
